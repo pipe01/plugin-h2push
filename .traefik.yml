@@ -1,0 +1,5 @@
+displayName: HTTP2 Push
+type: middleware
+import: github.com/pipe01/plugin-h2push
+summary: Allows pushing URLs when sending HTTP2 responses
+testData: {}
