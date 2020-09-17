@@ -46,11 +46,9 @@ type H2Push struct {
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	files := make([]pushFile, len(config.Files))
 
-	fmt.Println("hello")
-
 	var err error
 	for i, f := range config.Files {
-		compiled := pushFile{f, nil}
+		compiled := pushFile{H2PushFile: f}
 
 		if f.Match != "" {
 			compiled.MatchRegexp, err = regexp.Compile(f.Match)
@@ -67,9 +65,10 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 }
 
 func (h *H2Push) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	fmt.Println("--- request on plugin")
-
 	pusher, isPushable := rw.(http.Pusher)
+
+	log.Printf("request to %s", req.URL)
+	log.Printf("isPushable: %t", isPushable)
 
 	if isPushable && h.files != nil && len(h.files) > 0 {
 		pushFiles(pusher, h.files, req)
@@ -96,7 +95,7 @@ func pushLinks(p http.Pusher, linkHeaders []string) {
 	for _, h := range linkHeaders {
 		link, err := parseLink(h)
 		if err != nil {
-			log.Printf("failed to parse Link header: %w", err)
+			log.Printf("failed to parse Link header: %s", err)
 			return
 		}
 
